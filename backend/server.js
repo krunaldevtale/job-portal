@@ -20,7 +20,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://job-portal-snb2.vercel.app/'
+    "https://job-portal-snb2-5ya3sg9zn-krunal-devtales-projects.vercel.app"
   ],
   credentials: true
 }));         // Allow Fronted Request
