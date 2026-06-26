@@ -20,7 +20,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://your-frontend-vercel-url.vercel.app'
+    'https://job-portal-snb2.vercel.app/'
   ],
   credentials: true
 }));         // Allow Fronted Request
