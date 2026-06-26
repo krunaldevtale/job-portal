@@ -17,7 +17,13 @@ connectDB();
 const app = express();
 
 //Middleware
-app.use(cors())         // Allow Fronted Request
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://your-frontend-vercel-url.vercel.app'
+  ],
+  credentials: true
+}));         // Allow Fronted Request
 app.use(express.json()) // Lets server read JSON requests body
 
 // Mount routes
