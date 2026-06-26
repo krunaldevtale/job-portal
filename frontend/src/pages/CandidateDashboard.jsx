@@ -18,15 +18,15 @@ const stagger = {
 
 const cardVariant = {
   hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-// Status badge helper
+// Custom modern Status badge helper
 const StatusBadge = ({ status }) => {
   const styles = {
-    pending: "bg-yellow-50 text-yellow-600",
-    accepted: "bg-green-50 text-green-600",
-    rejected: "bg-red-50 text-red-500",
+    pending: "bg-amber-50 text-amber-700 border-amber-100",
+    accepted: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    rejected: "bg-rose-50 text-rose-700 border-rose-100",
   };
   const icons = {
     pending: <BsClockFill className="text-xs" />,
@@ -35,7 +35,7 @@ const StatusBadge = ({ status }) => {
   };
   return (
     <span
-      className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${styles[status]}`}
+      className={`flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border ${styles[status]}`}
     >
       {icons[status]} {status}
     </span>
@@ -61,7 +61,7 @@ function CandidateDashboard() {
     fetchApplications();
   }, []);
 
-  // Stats
+  // Stats sums
   const total = applications.length;
   const pending = applications.filter((a) => a.status === "pending").length;
   const accepted = applications.filter((a) => a.status === "accepted").length;
@@ -71,204 +71,220 @@ function CandidateDashboard() {
     {
       label: "Total Applied",
       value: total,
-      color: "bg-blue-50 text-blue-600",
+      gradient: "from-blue-600/10 to-blue-600/5 text-blue-600 border-blue-600/20",
       icon: BsBriefcaseFill,
     },
     {
       label: "Pending",
       value: pending,
-      color: "bg-yellow-50 text-yellow-600",
+      gradient: "from-amber-600/10 to-amber-600/5 text-amber-600 border-amber-600/20",
       icon: BsClockFill,
     },
     {
       label: "Accepted",
       value: accepted,
-      color: "bg-green-50 text-green-600",
+      gradient: "from-emerald-600/10 to-emerald-600/5 text-emerald-600 border-emerald-600/20",
       icon: BsCheckCircleFill,
     },
     {
       label: "Rejected",
       value: rejected,
-      color: "bg-red-50 text-red-500",
+      gradient: "from-rose-600/10 to-rose-600/5 text-rose-600 border-rose-600/20",
       icon: BsXCircleFill,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-slate-50/50 text-slate-800 selection:bg-indigo-500 selection:text-white pb-16">
+      {/* Header section */}
+      <div className="bg-white border-b border-slate-100 py-12 px-6 relative overflow-hidden mb-10">
+        {/* Ambient blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -left-10 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 right-20 w-72 h-72 bg-purple-500/5 rounded-full blur-3xl" />
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="max-w-6xl mx-auto relative z-10"
         >
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
             Welcome back, {user?.name?.split(" ")[0]} 👋
           </h1>
-          <p className="text-gray-500 text-sm">
-            Track all your job applications here
+          <p className="text-slate-500 font-medium">
+            Track and monitor the status of all your job applications
           </p>
         </motion.div>
+      </div>
 
-        {/* Stats Cards */}
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Stats Cards grid */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
         >
-          {stats.map(({ label, value, color, icon: Icon }) => (
+          {stats.map(({ label, value, gradient, icon: Icon }) => (
             <motion.div
               key={label}
               variants={cardVariant}
-              className="bg-white rounded-xl border border-gray-100 p-5"
+              className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow duration-300"
             >
               <div
-                className={`w-9 h-9 rounded-lg ${color} flex items-center justify-center mb-3`}
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} border flex items-center justify-center flex-shrink-0`}
               >
-                <Icon className="text-base" />
+                <Icon className="text-lg" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{value}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{label}</p>
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Applications List */}
+        {/* Applications List segment */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-gray-900 text-lg">
+          <div className="flex items-center justify-between mb-6 pb-2.5 border-b border-slate-100">
+            <h2 className="font-extrabold text-slate-800 text-xl tracking-tight">
               My Applications
             </h2>
             <Link
               to="/jobs"
-              className="text-sm text-blue-600 font-medium hover:underline"
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition"
             >
               Browse more jobs →
             </Link>
           </div>
 
-          {/* Loading */}
+          {/* Skeletons loader */}
           {loading && (
-            <div className="space-y-3">
+            <div className="space-y-4 animate-pulse">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse"
+                  className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-lg" />
-                      <div>
-                        <div className="h-4 bg-gray-200 rounded w-40 mb-2" />
-                        <div className="h-3 bg-gray-200 rounded w-24" />
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 bg-slate-100 rounded-xl" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-slate-100 rounded w-1/3 mb-2" />
+                        <div className="h-3 bg-slate-100 rounded w-1/4" />
                       </div>
                     </div>
-                    <div className="h-6 bg-gray-200 rounded w-20" />
+                    <div className="w-20 h-6 bg-slate-100 rounded-full" />
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty Applications state */}
           {!loading && applications.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-white rounded-xl border border-gray-100 p-16 text-center"
+              className="bg-white rounded-3xl border border-slate-100 p-16 text-center shadow-sm max-w-xl mx-auto"
             >
-              <BsBriefcaseFill className="text-gray-300 text-5xl mx-auto mb-4" />
-              <h3 className="font-medium text-gray-500 mb-2">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-5 shadow-inner">
+                <BsBriefcaseFill className="text-3xl" />
+              </div>
+              <h3 className="font-extrabold text-slate-800 text-lg mb-2">
                 No applications yet
               </h3>
-              <p className="text-gray-400 text-sm mb-6">
-                Start applying to jobs to track them here
+              <p className="text-slate-500 text-sm mb-8 leading-relaxed max-w-xs mx-auto">
+                You haven't submitted any job applications yet. Apply to jobs to start tracking status here.
               </p>
               <Link
                 to="/jobs"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
+                className="inline-flex bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md transition duration-200"
               >
                 Browse Jobs
               </Link>
             </motion.div>
           )}
 
-          {/* Applications */}
+          {/* Applications list render */}
           {!loading && applications.length > 0 && (
             <motion.div
               variants={stagger}
               initial="hidden"
               animate="visible"
-              className="space-y-3"
+              className="space-y-4"
             >
               {applications.map((app) => (
                 <motion.div
                   key={app._id}
                   variants={cardVariant}
                   whileHover={{ x: 3, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-sm transition"
+                  className={`bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.03)] hover:border-indigo-100/50 transition-all duration-300 relative border-l-4 ${
+                    app.status === "pending"
+                      ? "border-l-amber-500"
+                      : app.status === "accepted"
+                        ? "border-l-emerald-500"
+                        : "border-l-rose-500"
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      {/* Company Initials */}
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                      {/* Logo box */}
+                      <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-base border border-slate-100 shadow-sm uppercase flex-shrink-0">
                         {app.job?.company?.slice(0, 2).toUpperCase()}
                       </div>
 
                       <div>
-                        <h3 className="font-medium text-gray-900 mb-0.5">
+                        <h3 className="font-extrabold text-slate-800 text-lg tracking-tight mb-0.5">
                           {app.job?.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-2">
+                        <p className="text-sm font-semibold text-slate-500 mb-3">
                           {app.job?.company}
                         </p>
-                        <div className="flex items-center gap-3 text-xs text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <MdLocationOn />
+                        <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                          <span className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                            <MdLocationOn className="text-slate-400" />
                             {app.job?.location}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MdWork />
+                          <span className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                            <MdWork className="text-slate-400" />
                             {app.job?.salary}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <BsClockFill />
-                            {new Date(app.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
+                          <span className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                            <BsClockFill className="text-slate-400 text-xs" />
+                            {new Date(app.createdAt).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2">
+                    {/* Right side options */}
+                    <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-3 flex-shrink-0 border-t border-slate-50 pt-3 sm:border-0 sm:pt-0">
                       <StatusBadge status={app.status} />
                       <Link
                         to={`/jobs/${app.job?._id}`}
-                        className="text-xs text-blue-600 hover:underline"
+                        className="text-xs bg-indigo-50 hover:bg-indigo-100/80 text-indigo-600 border border-indigo-100/50 px-3.5 py-1.5 rounded-xl transition duration-200 font-bold"
                       >
                         View Job
                       </Link>
                     </div>
                   </div>
 
-                  {/* Cover Letter Preview */}
+                  {/* Cover Letter letterbox message */}
                   {app.coverLetter && (
-                    <div className="mt-3 pt-3 border-t border-gray-50">
-                      <p className="text-xs text-gray-400 line-clamp-2">
-                        📝 {app.coverLetter}
+                    <div className="mt-4 pt-4 border-t border-slate-50">
+                      <p className="text-xs text-slate-400 font-semibold italic bg-slate-50/50 border border-slate-100/50 p-3 rounded-xl leading-relaxed">
+                        📝 Cover Letter: "{app.coverLetter}"
                       </p>
                     </div>
                   )}

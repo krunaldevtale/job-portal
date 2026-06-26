@@ -11,6 +11,13 @@ import { MdLocationOn, MdWork, MdAdd, MdClose, MdDelete } from "react-icons/md";
 import axiosInstance from "../utils/axios";
 import { useAuth } from "../context/AuthContext";
 
+const typeOptions = [
+  { value: "fulltime", label: "Full Time" },
+  { value: "parttime", label: "Part Time" },
+  { value: "internship", label: "Internship" },
+  { value: "contract", label: "Contract" },
+];
+
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08 } },
@@ -18,7 +25,7 @@ const stagger = {
 
 const cardVariant = {
   hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
 function RecruiterDashboard() {
@@ -31,6 +38,7 @@ function RecruiterDashboard() {
   const [applicants, setApplicants] = useState([]);
   const [posting, setPosting] = useState(false);
   const [skillInput, setSkillInput] = useState("");
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
 
   const [jobForm, setJobForm] = useState({
     title: "",
@@ -158,166 +166,197 @@ function RecruiterDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-slate-50/50 text-slate-800 selection:bg-indigo-500 selection:text-white pb-16">
+      {/* Header section */}
+      <div className="bg-white border-b border-slate-100 py-12 px-6 relative overflow-hidden mb-10">
+        {/* Accent blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -left-10 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 right-20 w-72 h-72 bg-purple-500/5 rounded-full blur-3xl" />
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-start justify-between mb-8"
+          className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10"
         >
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
               Welcome, {user?.name?.split(" ")[0]} 👋
             </h1>
-            <p className="text-gray-500 text-sm">
-              Manage your job postings and applicants
+            <p className="text-slate-500 font-medium">
+              Manage your job postings and evaluate applicants
             </p>
           </div>
           <motion.button
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowPostModal(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold px-5 py-3 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
           >
             <MdAdd className="text-lg" />
             Post a Job
           </motion.button>
         </motion.div>
+      </div>
 
-        {/* Stats */}
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Stats segment */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
         >
           {[
             {
               label: "Jobs Posted",
               value: jobs.length,
               icon: BsBriefcaseFill,
-              color: "bg-blue-50 text-blue-600",
+              gradient: "from-blue-600/10 to-blue-600/5 text-blue-600 border-blue-600/20",
             },
             {
               label: "Total Applicants",
               value: totalApplicants,
               icon: BsPeopleFill,
-              color: "bg-purple-50 text-purple-600",
+              gradient: "from-purple-600/10 to-purple-600/5 text-purple-600 border-purple-600/20",
             },
-          ].map(({ label, value, icon: Icon, color }) => (
+          ].map(({ label, value, icon: Icon, gradient }) => (
             <motion.div
               key={label}
               variants={cardVariant}
-              className="bg-white rounded-xl border border-gray-100 p-5"
+              className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow duration-300"
             >
               <div
-                className={`w-9 h-9 rounded-lg ${color} flex items-center justify-center mb-3`}
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} border flex items-center justify-center flex-shrink-0`}
               >
-                <Icon className="text-base" />
+                <Icon className="text-lg" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{value}</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{label}</p>
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Jobs List */}
+        {/* Jobs list segment */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <h2 className="font-semibold text-gray-900 text-lg mb-5">
-            Your Job Postings
-          </h2>
+          <div className="flex items-center justify-between mb-6 pb-2.5 border-b border-slate-100">
+            <h2 className="font-extrabold text-slate-800 text-xl tracking-tight">
+              Your Job Postings
+            </h2>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
+              {jobs.length} listed
+            </span>
+          </div>
 
-          {/* Loading */}
+          {/* Skeletons loader */}
           {loading && (
-            <div className="space-y-3">
+            <div className="space-y-4 animate-pulse">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse"
+                  className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-lg" />
-                      <div>
-                        <div className="h-4 bg-gray-200 rounded w-40 mb-2" />
-                        <div className="h-3 bg-gray-200 rounded w-24" />
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 bg-slate-100 rounded-xl" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-slate-100 rounded w-1/3 mb-2" />
+                        <div className="h-3 bg-slate-100 rounded w-1/4" />
                       </div>
                     </div>
-                    <div className="h-8 bg-gray-200 rounded w-24" />
+                    <div className="w-20 h-8 bg-slate-100 rounded-lg" />
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty Listings layout */}
           {!loading && jobs.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-white rounded-xl border border-gray-100 p-16 text-center"
+              className="bg-white rounded-3xl border border-slate-100 p-16 text-center shadow-sm max-w-xl mx-auto"
             >
-              <BsBriefcaseFill className="text-gray-300 text-5xl mx-auto mb-4" />
-              <h3 className="font-medium text-gray-500 mb-2">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-5 shadow-inner">
+                <BsBriefcaseFill className="text-3xl" />
+              </div>
+              <h3 className="font-extrabold text-slate-800 text-lg mb-2">
                 No jobs posted yet
               </h3>
-              <p className="text-gray-400 text-sm mb-6">
-                Post your first job to start finding candidates
+              <p className="text-slate-500 text-sm mb-8 leading-relaxed max-w-xs mx-auto">
+                Publish your first vacancy opening to start collecting candidate job applications.
               </p>
               <button
                 onClick={() => setShowPostModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md transition duration-200"
               >
-                Post a Job
+                Post your first Job
               </button>
             </motion.div>
           )}
 
-          {/* Jobs */}
+          {/* Jobs Listing grid */}
           {!loading && jobs.length > 0 && (
             <motion.div
               variants={stagger}
               initial="hidden"
               animate="visible"
-              className="space-y-3"
+              className="grid grid-cols-1 gap-4"
             >
               {jobs.map((job) => (
                 <motion.div
                   key={job._id}
                   variants={cardVariant}
-                  className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-sm transition"
+                  className={`bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.03)] hover:border-indigo-100/50 transition-all duration-300 relative border-l-4 ${
+                    job.type === "fulltime"
+                      ? "border-l-emerald-500"
+                      : job.type === "internship"
+                        ? "border-l-violet-500"
+                        : job.type === "parttime"
+                          ? "border-l-amber-500"
+                          : "border-l-blue-500"
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                      {/* Logo squircle */}
+                      <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-base border border-slate-100 shadow-sm uppercase flex-shrink-0">
                         {job.company?.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900 mb-0.5">
+                        <h3 className="font-extrabold text-slate-800 text-lg tracking-tight mb-0.5">
                           {job.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-2">
+                        <p className="text-sm font-semibold text-slate-500 mb-3">
                           {job.company}
                         </p>
-                        <div className="flex items-center gap-3 text-xs text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <MdLocationOn />
+                        <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                          <span className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                            <MdLocationOn className="text-slate-400" />
                             {job.location}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <MdWork />
+                          <span className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                            <MdWork className="text-slate-400" />
                             {job.salary}
                           </span>
                           <span
-                            className={`px-2 py-0.5 rounded-full font-medium ${
+                            className={`px-2.5 py-1 rounded-full font-bold uppercase border ${
                               job.type === "fulltime"
-                                ? "bg-green-50 text-green-600"
-                                : "bg-purple-50 text-purple-600"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                : job.type === "internship"
+                                  ? "bg-violet-50 text-violet-700 border-violet-100"
+                                  : job.type === "parttime"
+                                    ? "bg-amber-50 text-amber-700 border-amber-100"
+                                    : "bg-blue-50 text-blue-700 border-blue-100"
                             }`}
                           >
                             {job.type}
@@ -326,20 +365,20 @@ function RecruiterDashboard() {
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    {/* Listing Action buttons */}
+                    <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-center">
                       <button
                         onClick={() => handleViewApplicants(job)}
-                        className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition font-medium"
+                        className="flex items-center gap-1.5 text-xs bg-indigo-50 hover:bg-indigo-100/80 text-indigo-600 border border-indigo-100/50 px-4 py-2 rounded-xl transition duration-200 font-bold"
                       >
-                        <BsPeopleFill />
-                        Applicants
+                        <BsPeopleFill className="text-sm" />
+                        Applicants ({job.applicantCount || 0})
                       </button>
                       <button
                         onClick={() => handleDeleteJob(job._id)}
-                        className="flex items-center gap-1 text-xs bg-red-50 text-red-500 hover:bg-red-100 px-3 py-1.5 rounded-lg transition font-medium"
+                        className="flex items-center gap-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 px-4 py-2 rounded-xl transition duration-200 font-bold"
                       >
-                        <MdDelete />
+                        <MdDelete className="text-sm" />
                         Delete
                       </button>
                     </div>
@@ -351,141 +390,182 @@ function RecruiterDashboard() {
         </motion.div>
       </div>
 
-      {/* ── Post Job Modal ── */}
+      {/* ── Post Job Modal popup ── */}
       <AnimatePresence>
         {showPostModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-6"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-3xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-slate-100 shadow-2xl relative no-scrollbar"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="flex items-center justify-between mb-6 border-b border-slate-50 pb-4">
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
                   Post a New Job
                 </h3>
                 <button
                   onClick={() => setShowPostModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition"
                 >
-                  <MdClose className="text-xl" />
+                  <MdClose className="text-lg" />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
                 {/* Title */}
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                  <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                     Job Title *
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Frontend Developer"
+                    required
+                    placeholder="e.g. Lead Frontend Developer"
                     value={jobForm.title}
                     onChange={(e) =>
                       setJobForm({ ...jobForm, title: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 font-medium transition-all"
                   />
                 </div>
 
                 {/* Company */}
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                  <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                     Company Name *
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. TechCorp"
+                    required
+                    placeholder="e.g. TechCorp Solutions"
                     value={jobForm.company}
                     onChange={(e) =>
                       setJobForm({ ...jobForm, company: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 font-medium transition-all"
                   />
                 </div>
 
                 {/* Location + Type */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                    <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                       Location *
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Pune"
+                      required
+                      placeholder="e.g. Pune, IN (Hybrid)"
                       value={jobForm.location}
                       onChange={(e) =>
                         setJobForm({ ...jobForm, location: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 font-medium transition-all"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                    <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                       Job Type
                     </label>
-                    <select
-                      value={jobForm.type}
-                      onChange={(e) =>
-                        setJobForm({ ...jobForm, type: e.target.value })
-                      }
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="fulltime">Full Time</option>
-                      <option value="parttime">Part Time</option>
-                      <option value="internship">Internship</option>
-                      <option value="contract">Contract</option>
-                    </select>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}
+                        className="w-full flex items-center justify-between px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white text-slate-700 font-semibold cursor-pointer transition-all duration-200 select-none text-left"
+                      >
+                        <span>
+                          {typeOptions.find((opt) => opt.value === jobForm.type)?.label || "Full Time"}
+                        </span>
+                        <span className={`w-2.5 h-2.5 border-r-2 border-b-2 border-slate-400 transform transition-transform duration-200 pointer-events-none mt-[-3px] ${typeDropdownOpen ? "rotate-[225deg]" : "rotate-45"}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {typeDropdownOpen && (
+                          <>
+                            {/* Backdrop layer to click close */}
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setTypeDropdownOpen(false)}
+                            />
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.15 }}
+                              className="absolute z-20 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 overflow-hidden"
+                            >
+                              {typeOptions.map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setJobForm({ ...jobForm, type: opt.value });
+                                    setTypeDropdownOpen(false);
+                                  }}
+                                  className={`w-full text-left px-5 py-2.5 text-sm font-semibold transition ${
+                                    jobForm.type === opt.value
+                                      ? "bg-indigo-50 text-indigo-600"
+                                      : "text-slate-600 hover:bg-slate-50"
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
 
                 {/* Salary */}
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 block">
-                    Salary
+                  <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
+                    Salary range
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. 6-8 LPA"
+                    placeholder="e.g. 12 - 18 LPA"
                     value={jobForm.salary}
                     onChange={(e) =>
                       setJobForm({ ...jobForm, salary: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 font-medium transition-all"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                  <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                     Job Description *
                   </label>
                   <textarea
-                    placeholder="Describe the role, responsibilities..."
+                    required
+                    placeholder="Provide full description of job role responsibilities, perks..."
                     value={jobForm.description}
                     onChange={(e) =>
                       setJobForm({ ...jobForm, description: e.target.value })
                     }
                     rows={4}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 leading-relaxed transition-all resize-none"
                   />
                 </div>
 
-                {/* Skills */}
+                {/* Skills fields */}
                 <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1.5 block">
+                  <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
                     Skills Required
                   </label>
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-3">
                     <input
                       type="text"
                       placeholder="e.g. React"
@@ -494,45 +574,50 @@ function RecruiterDashboard() {
                       onKeyDown={(e) =>
                         e.key === "Enter" && (e.preventDefault(), addSkill())
                       }
-                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white placeholder:text-slate-400 font-medium transition-all"
                     />
                     <button
                       type="button"
                       onClick={addSkill}
-                      className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                      className="bg-indigo-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-indigo-500 transition duration-200 shadow-md shadow-indigo-600/10"
                     >
                       Add
                     </button>
                   </div>
-                  {/* Skill Tags */}
+                  {/* Selected Tags list */}
                   <div className="flex flex-wrap gap-2">
                     {jobForm.skillsRequired.map((skill) => (
                       <span
                         key={skill}
-                        className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg"
+                        className="inline-flex items-center gap-1.5 text-xs bg-slate-50 text-slate-600 border border-slate-100 px-3 py-1.5 rounded-xl font-bold select-none"
                       >
                         {skill}
-                        <button onClick={() => removeSkill(skill)}>
-                          <MdClose className="text-xs hover:text-red-500" />
+                        <button
+                          type="button"
+                          onClick={() => removeSkill(skill)}
+                          className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                          <MdClose className="text-xs" />
                         </button>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                {/* Submit */}
-                <div className="flex gap-3 pt-2">
+                {/* Actions button rows */}
+                <div className="flex gap-3 pt-4 border-t border-slate-50">
                   <button
+                    type="button"
                     onClick={() => setShowPostModal(false)}
-                    className="flex-1 border border-gray-200 text-gray-500 hover:bg-gray-50 font-medium py-2.5 rounded-xl transition text-sm"
+                    className="flex-1 border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 font-bold py-3 rounded-xl transition duration-200 text-sm"
                   >
                     Cancel
                   </button>
                   <motion.button
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handlePostJob}
                     disabled={posting}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-medium py-2.5 rounded-xl transition text-sm flex items-center justify-center"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-70 text-white font-bold py-3 rounded-xl transition duration-300 text-sm flex items-center justify-center shadow-lg shadow-indigo-600/10"
                   >
                     {posting ? (
                       <motion.div
@@ -542,122 +627,122 @@ function RecruiterDashboard() {
                           duration: 0.8,
                           ease: "linear",
                         }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                       />
                     ) : (
                       "Post Job"
                     )}
                   </motion.button>
                 </div>
-              </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Applicants Modal ── */}
+      {/* ── Applicants Viewer Modal popup ── */}
       <AnimatePresence>
         {showApplicantsModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-6"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+              className="bg-white rounded-3xl p-8 w-full max-w-lg max-h-[85vh] overflow-y-auto border border-slate-100 shadow-2xl relative"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Applicants
+              <div className="flex items-center justify-between mb-2 border-b border-slate-50 pb-3">
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  Applicants List
                 </h3>
                 <button
                   onClick={() => setShowApplicantsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition"
                 >
-                  <MdClose className="text-xl" />
+                  <MdClose className="text-lg" />
                 </button>
               </div>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">
                 {selectedJob?.title} · {applicants.length} applicant(s)
               </p>
 
-              {/* No Applicants */}
+              {/* No Applicants indicator */}
               {applicants.length === 0 && (
-                <div className="text-center py-10">
-                  <BsPeopleFill className="text-gray-300 text-4xl mx-auto mb-3" />
-                  <p className="text-gray-400 text-sm">
+                <div className="text-center py-12 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                  <BsPeopleFill className="text-slate-300 text-4xl mx-auto mb-3" />
+                  <p className="text-slate-500 text-sm font-semibold">
                     No applicants yet for this job
                   </p>
                 </div>
               )}
 
-              {/* Applicants List */}
-              <div className="space-y-3">
+              {/* Applicants Rows */}
+              <div className="space-y-4">
                 {applicants.map((app) => (
                   <div
                     key={app._id}
-                    className="border border-gray-100 rounded-xl p-4"
+                    className="border border-slate-100 rounded-2xl p-5 bg-white hover:border-slate-200 transition duration-200 shadow-sm"
                   >
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50/60 text-indigo-600 border border-indigo-100/30 flex items-center justify-center font-bold text-sm uppercase flex-shrink-0">
                           {app.applicant?.name?.slice(0, 1).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">
+                          <p className="font-extrabold text-slate-800 text-sm">
                             {app.applicant?.name}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-slate-400 font-medium">
                             {app.applicant?.email}
                           </p>
                         </div>
                       </div>
 
                       <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
+                        className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border ${
                           app.status === "pending"
-                            ? "bg-yellow-50 text-yellow-600"
+                            ? "bg-amber-50 text-amber-700 border-amber-100"
                             : app.status === "accepted"
-                              ? "bg-green-50 text-green-600"
-                              : "bg-red-50 text-red-500"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : "bg-red-50 text-red-700 border-red-100"
                         }`}
                       >
                         {app.status}
                       </span>
                     </div>
 
-                    {/* Cover Letter */}
+                    {/* Cover Letter message */}
                     {app.coverLetter && (
-                      <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                      <div className="bg-slate-50 border border-slate-100/60 p-4 rounded-xl text-xs leading-relaxed text-slate-500 mb-4 font-medium italic relative">
                         "{app.coverLetter}"
-                      </p>
+                      </div>
                     )}
 
-                    {/* Action Buttons */}
+                    {/* Status updates action button bars */}
                     {app.status === "pending" && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 border-t border-slate-50 pt-3 mt-3">
                         <button
                           onClick={() =>
                             handleUpdateStatus(app._id, "accepted")
                           }
-                          className="flex items-center gap-1 text-xs bg-green-50 text-green-600 hover:bg-green-100 px-3 py-1.5 rounded-lg transition font-medium"
+                          className="flex items-center gap-1.5 text-xs bg-emerald-50 hover:bg-emerald-100/80 text-emerald-600 border border-emerald-100/50 px-4 py-2 rounded-xl transition duration-200 font-bold"
                         >
-                          <BsCheckCircleFill />
+                          <BsCheckCircleFill className="text-xs" />
                           Accept
                         </button>
                         <button
                           onClick={() =>
                             handleUpdateStatus(app._id, "rejected")
                           }
-                          className="flex items-center gap-1 text-xs bg-red-50 text-red-500 hover:bg-red-100 px-3 py-1.5 rounded-lg transition font-medium"
+                          className="flex items-center gap-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-100/50 px-4 py-2 rounded-xl transition duration-200 font-bold"
                         >
-                          <BsXCircleFill />
+                          <BsXCircleFill className="text-xs" />
                           Reject
                         </button>
                       </div>

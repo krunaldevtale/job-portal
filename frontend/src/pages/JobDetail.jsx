@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { MdLocationOn, MdWork, MdArrowBack } from "react-icons/md";
 import { BsBriefcaseFill, BsClockFill, BsPersonFill } from "react-icons/bs";
@@ -61,24 +61,25 @@ function JobDetail() {
     }
   };
 
-  // Loading skeleton
+  // Loading skeleton matching modern aesthetics
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-10 px-6">
+      <div className="min-h-screen bg-slate-50/50 py-12 px-6">
         <div className="max-w-3xl mx-auto animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-24 mb-8" />
-          <div className="bg-white rounded-2xl p-8">
+          <div className="h-5 bg-slate-200 rounded-lg w-28 mb-8" />
+          <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
             <div className="flex gap-4 mb-6">
-              <div className="w-16 h-16 bg-gray-200 rounded-xl" />
-              <div className="flex-1">
-                <div className="h-6 bg-gray-200 rounded w-2/3 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/3" />
+              <div className="w-16 h-16 bg-slate-200 rounded-2xl" />
+              <div className="flex-1 mt-2">
+                <div className="h-6 bg-slate-200 rounded w-2/3 mb-3" />
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-full" />
-              <div className="h-4 bg-gray-200 rounded w-full" />
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-[1px] bg-slate-100 w-full mb-6" />
+            <div className="space-y-4">
+              <div className="h-4 bg-slate-100 rounded w-full" />
+              <div className="h-4 bg-slate-100 rounded w-full" />
+              <div className="h-4 bg-slate-100 rounded w-3/4" />
             </div>
           </div>
         </div>
@@ -89,7 +90,7 @@ function JobDetail() {
   if (!job) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-6">
+    <div className="min-h-screen bg-slate-50/50 py-12 px-6 selection:bg-indigo-500 selection:text-white">
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <motion.div
@@ -99,93 +100,105 @@ function JobDetail() {
         >
           <Link
             to="/jobs"
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition mb-6"
+            className="group inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 font-semibold transition mb-8 duration-200"
           >
-            <MdArrowBack />
+            <MdArrowBack className="text-base group-hover:-translate-x-0.5 transition-transform" />
             Back to Jobs
           </Link>
         </motion.div>
 
+        {/* Main Details Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-2xl border border-gray-100 p-8 mb-4"
+          className={`bg-white rounded-3xl border border-slate-100 p-8 md:p-10 shadow-xl shadow-slate-100/50 mb-6 relative overflow-hidden border-l-4 ${
+            job.type === "fulltime"
+              ? "border-l-emerald-500"
+              : job.type === "internship"
+                ? "border-l-violet-500"
+                : job.type === "parttime"
+                  ? "border-l-amber-500"
+                  : "border-l-blue-500"
+          }`}
         >
-          {/* Job Header */}
-          <div className="flex items-start justify-between mb-6">
+          {/* Job Header Info */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-xl border border-slate-100 shadow-sm uppercase flex-shrink-0">
                 {job.company?.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">
                   {job.title}
                 </h1>
-                <p className="text-gray-500">{job.company}</p>
+                <p className="text-slate-500 font-semibold text-sm md:text-base">
+                  {job.company}
+                </p>
               </div>
             </div>
 
             <span
-              className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+              className={`text-xs px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider border self-start ${
                 job.type === "fulltime"
-                  ? "bg-green-50 text-green-600"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                   : job.type === "internship"
-                    ? "bg-purple-50 text-purple-600"
+                    ? "bg-violet-50 text-violet-700 border-violet-100"
                     : job.type === "parttime"
-                      ? "bg-yellow-50 text-yellow-600"
-                      : "bg-blue-50 text-blue-600"
+                      ? "bg-amber-50 text-amber-700 border-amber-100"
+                      : "bg-blue-50 text-blue-700 border-blue-100"
               }`}
             >
               {job.type}
             </span>
           </div>
 
-          {/* Job Meta */}
-          <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b border-gray-100">
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <MdLocationOn className="text-blue-500" />
-              {job.location}
+          {/* Metadata Icons Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-6 border-b border-slate-100">
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 border border-slate-100 px-3.5 py-2 rounded-xl">
+              <MdLocationOn className="text-indigo-500 text-base flex-shrink-0" />
+              <span className="font-semibold truncate">{job.location}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <MdWork className="text-blue-500" />
-              {job.salary}
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-indigo-50/40 border border-indigo-100/30 px-3.5 py-2 rounded-xl">
+              <MdWork className="text-indigo-600 text-base flex-shrink-0" />
+              <span className="font-bold text-indigo-600 truncate">{job.salary}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <BsPersonFill className="text-blue-500" />
-              Posted by {job.postedBy?.name}
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 border border-slate-100 px-3.5 py-2 rounded-xl col-span-1 md:col-span-1">
+              <BsPersonFill className="text-slate-400 text-base flex-shrink-0" />
+              <span className="font-semibold truncate">{job.postedBy?.name || "Recruiter"}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <BsClockFill className="text-blue-500" />
-              {new Date(job.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 border border-slate-100 px-3.5 py-2 rounded-xl">
+              <BsClockFill className="text-slate-400 text-base flex-shrink-0" />
+              <span className="font-semibold truncate">
+                {new Date(job.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="mb-6">
-            <h2 className="font-semibold text-gray-900 mb-3">
+          {/* Job Description details */}
+          <div className="mb-8">
+            <h2 className="font-bold text-slate-800 text-lg mb-3 border-b border-slate-50 pb-2.5">
               Job Description
             </h2>
-            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+            <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line font-medium">
               {job.description}
             </p>
           </div>
 
-          {/* Skills Required */}
+          {/* Required Skills list */}
           {job.skillsRequired?.length > 0 && (
-            <div className="mb-6">
-              <h2 className="font-semibold text-gray-900 mb-3">
+            <div className="mb-8">
+              <h2 className="font-bold text-slate-800 text-lg mb-3.5 border-b border-slate-50 pb-2.5">
                 Skills Required
               </h2>
               <div className="flex flex-wrap gap-2">
                 {job.skillsRequired.map((skill) => (
                   <span
                     key={skill}
-                    className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-medium"
+                    className="text-xs bg-slate-50 text-slate-600 border border-slate-100 px-3.5 py-1.5 rounded-lg font-bold hover:bg-slate-100 transition-colors"
                   >
                     {skill}
                   </span>
@@ -194,23 +207,24 @@ function JobDetail() {
             </div>
           )}
 
-          {/* Apply Button */}
-          <div className="pt-4 border-t border-gray-100">
+          {/* CTA Row */}
+          <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
             {applied ? (
-              <div className="flex items-center gap-2 text-green-600 font-medium">
+              <div className="flex items-center gap-2 text-emerald-600 font-bold bg-emerald-50 border border-emerald-100/50 px-5 py-2.5 rounded-xl text-sm">
                 ✅ Application submitted successfully!
               </div>
             ) : user?.role === "recruiter" ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-400 font-semibold italic bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl">
                 Recruiters cannot apply to jobs
               </p>
             ) : (
               <motion.button
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleApply}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-xl transition flex items-center gap-2"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
               >
-                <BsBriefcaseFill />
+                <BsBriefcaseFill className="text-sm" />
                 {user ? "Apply Now" : "Login to Apply"}
               </motion.button>
             )}
@@ -218,68 +232,72 @@ function JobDetail() {
         </motion.div>
       </div>
 
-      {/* Apply Modal */}
-      {showModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
-        >
+      {/* Apply Modal popup */}
+      <AnimatePresence>
+        {showModal && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center z-50 px-4"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Apply for {job.title}
-            </h3>
-            <p className="text-gray-500 text-sm mb-5">
-              {job.company} · {job.location}
-            </p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-3xl border border-slate-100 shadow-2xl p-8 w-full max-w-md relative overflow-hidden"
+            >
+              <h3 className="text-xl font-extrabold text-slate-900 mb-1 tracking-tight">
+                Apply for {job.title}
+              </h3>
+              <p className="text-slate-500 text-xs font-semibold mb-6">
+                {job.company} · {job.location}
+              </p>
 
-            <label className="text-xs font-medium text-gray-600 mb-1.5 block">
-              Cover Letter (optional)
-            </label>
-            <textarea
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="Tell the recruiter why you're a great fit..."
-              rows={5}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none mb-4"
-            />
+              <label className="text-xs font-bold text-slate-600 mb-2 block uppercase tracking-wider">
+                Cover Letter (optional)
+              </label>
+              <textarea
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                placeholder="Write a brief pitch telling the recruiter why you're an excellent fit for this role..."
+                rows={5}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 bg-slate-50/50 focus:bg-white resize-none mb-6 placeholder:text-slate-400 leading-relaxed"
+              />
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-200 text-gray-500 hover:bg-gray-50 font-medium py-2.5 rounded-xl transition text-sm"
-              >
-                Cancel
-              </button>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={submitApplication}
-                disabled={applying}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-medium py-2.5 rounded-xl transition text-sm flex items-center justify-center"
-              >
-                {applying ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.8,
-                      ease: "linear",
-                    }}
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                  />
-                ) : (
-                  "Submit Application"
-                )}
-              </motion.button>
-            </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 font-bold py-3 rounded-xl transition duration-200 text-sm"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={submitApplication}
+                  disabled={applying}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-70 text-white font-bold py-3 rounded-xl transition duration-300 text-sm flex items-center justify-center shadow-lg shadow-indigo-600/10"
+                >
+                  {applying ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 0.8,
+                        ease: "linear",
+                      }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                  ) : (
+                    "Submit App"
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
